@@ -49,5 +49,7 @@ def cli(verbose):
 
 from . import (
     plot,
-    snip
+    snip,
+    rescale,
+    evaluate
 )

@@ -1,7 +1,8 @@
-import hiclib
 import mirnylib
 from mirnylib import numutils
 import cooler
+import pickle
+import h5py
 
 import glob
 
@@ -9,12 +10,9 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set_style('whitegrid')
 
 import pandas as pd
 import numpy as np
-
-import cooler
 
 def read_cooler(in_cooler, balance=True):
     datasets = {}
@@ -25,12 +23,39 @@ def read_cooler(in_cooler, balance=True):
 
     return datasets, chrms, c.binsize
 
-def read_hiclib_heatmap(infile):
-    pass
+def read_hiclib_heatmap(infile, balance=False):
+    datasets = {}
+    f = h5py.File(infile)
+    map = f['heatmap'][()]
+    resolution = pickle.loads(f['resolution'][()])
+    chrms_sizes = f['chromosomeStarts'][()]
+    idx2chrms = pickle.loads(f['genomeIdxToLabel'][()])
+    for idx in idx2chrms.keys():
+        ch = idx2chrms[idx]
+        ch = ch if 'chr' in ch else f'chr{ch}'
+        bgn = chrms_sizes[idx]
+        end = chrms_sizes[idx+1] if idx+1<len(chrms_sizes) else len(map)
+        mtx = map[bgn:end, bgn:end]
+        if balance:
+            mtx = numutils.iterativeCorrection(mtx)
+        datasets[ch] = mtx
 
-def read_hiclib_bychr(infile):
-    pass
+    return datasets, sorted(datasets.keys()), resolution
 
+def read_hiclib_bychr(infile, balance=False):
+    datasets = {}
+    f = h5py.File(infile)
+    resolution = pickle.loads(f['resolution'][()])
+    idx2chrms = pickle.loads(f['genomeIdxToLabel'][()])
+    for idx in idx2chrms.keys():
+        ch = idx2chrms[idx]
+        mtx = f[f'{idx} {idx}'][()]
+        ch = ch if 'chr' in ch else f'chr{ch}'
+        if balance:
+            mtx = numutils.iterativeCorrection(mtx)
+        datasets[ch] = mtx
+
+    return datasets, sorted(datasets.keys()), resolution
 
 def shuffle_segmentation(segmentation, seed=None):
 
@@ -60,9 +85,9 @@ def snipper(segmentations, dataset, window=1, key_bgn='bgn_bin', key_end='end_bi
         input_mtx = dataset[r.ch]
         bgn = max(0, r[key_bgn] - size)
         end = min(r[key_end] + size, len(input_mtx))
-        mtx = input_mtx[bgn:end, bgn:end]
+        mtx = np.log2(input_mtx[bgn:end, bgn:end])
         mtx[np.isinf(mtx)] = np.nan
-        ret.append(np.log2(mtx))
+        ret.append(mtx)
     return np.array(ret)
 
 def zoom(snippets, finalShape=(30, 30), saveSum=True, order=1):
@@ -90,32 +115,31 @@ def compute_enrichment(mtx, window=1, normalize=False):
     return enrichment
 
 
-def plot_heatmap(s, pngname, cmap='Reds', center=None, vmax=None, title='', mask_diags=2):
-    plt.figure(figsize=[7, 7])
+def plot_heatmap(s, pngname, cmap='Reds', center=None, vmax=None, title='', cbar=True, figsize=[7,7], window=1):
+
+    plt.figure(figsize=figsize)
     mtx = s.copy()
-    for i in range(1, mask_diags):
-        np.fill_diagonal(mtx[i:, :-i], np.nan)
-        np.fill_diagonal(mtx[:-i, i:], np.nan)
-    if mask_diags:
-        np.fill_diagonal(mtx, np.nan)
 
     if not center is None and not vmax is None:
         sns.heatmap(mtx, square=True, cmap=cmap,
-                    center=center, vmin=-vmax, vmax=vmax)
+                    center=center, vmin=-vmax, vmax=vmax, cbar=cbar)
     elif not center is None:
         sns.heatmap(mtx, square=True, cmap=cmap,
-                    center=center)
+                    center=center, cbar=cbar)
     else:
-        sns.heatmap(mtx, square=True, cmap=cmap)
-    # plt.plot([0, 120], [120 / 3, 120 / 3], '--', color='grey', alpha=0.5)
-    # plt.plot([0, 120], [2 * 120 / 3, 2 * 120 / 3], '--', color='grey', alpha=0.5)
-    # plt.plot([120 / 3, 120 / 3], [0, 120], '--', color='grey', alpha=0.5)
-    # plt.plot([2 * 120 / 3, 2 * 120 / 3], [0, 120], '--', color='grey', alpha=0.5)
+        sns.heatmap(mtx, square=True, cmap=cmap, cbar=cbar)
+
+    size = len(mtx)
+    bgn = size * window / (2 * window + 1)
+    end = size - bgn
+    plt.plot([0, size], [bgn, bgn], '--', color='gray', alpha=0.5)
+    plt.plot([0, size], [end, end], '--', color='gray', alpha=0.5)
+    plt.plot([bgn, bgn], [0, size], '--', color='gray', alpha=0.5)
+    plt.plot([end, end], [0, size], '--', color='gray', alpha=0.5)
 
     plt.xticks([])
     plt.yticks([])
 
-    # enrichment = np.nanmean(mtx[40:80, 40:80])
-    # plt.title(f'{title}\nRelative enrichment: {enrichment:.2f}')
+    plt.title(title)
 
     plt.savefig(pngname)

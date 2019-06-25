@@ -11,8 +11,6 @@ classifiers = """\
     Development Status :: 4 - Beta
     Operating System :: OS Independent
     Programming Language :: Python
-    Programming Language :: Python :: 2
-    Programming Language :: Python :: 2.7
     Programming Language :: Python :: 3
     Programming Language :: Python :: 3.4
     Programming Language :: Python :: 3.5
@@ -40,21 +38,15 @@ def get_version():
 def get_long_description():
     return _read('README.md')
 
-
-install_requires = [
-    'numpy>=1.9',
-    'scipy>=0.16',
-    'pandas>=0.19',
-    'h5py>=2.5',
-    'click>=7',
-]
-
+def get_requirements():
+    requirements = []
+    with open('requirements.txt') as f:
+        requirements = f.read().splitlines()
+    return requirements
 
 tests_require = [
     'pytest'
 ]
-
-
 setup(
     name='avTAD',
     author='Aleksandra Galitsyna',
@@ -69,7 +61,7 @@ setup(
     packages=find_packages(),
     zip_safe=False,
     classifiers=[s.strip() for s in classifiers.split('\n') if s],
-    install_requires=install_requires,
+    install_requires=get_requirements(),
     tests_require=tests_require,
     entry_points={
         'console_scripts': [
