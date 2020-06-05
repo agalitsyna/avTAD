@@ -1,7 +1,7 @@
 avTAD
 =======
 
-Deprectaion warning: This tool was developed before the release of other software for the same purpose (see [coolpuppy](https://github.com/Phlya/coolpuppy)). avTAD uses the deprecated library [mirnylib](https://github.com/mirnylab/mirnylib-legacy), which is no longer maintained, but still can be used with this package. 
+DEPRECATION WARNING: This tool was developed before the release of other software for the same purpose (see [coolpuppy](https://github.com/Phlya/coolpuppy)). avTAD uses the deprecated library [mirnylib](https://github.com/mirnylab/mirnylib-legacy), which is no longer maintained, but still can be used with this package. 
 
 avTAD is a tool for construction of average TAD plots. Basic pipeline consists of three steps: *snip*, *rescale* and *plot*. 
 
