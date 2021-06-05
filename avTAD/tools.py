@@ -1,8 +1,8 @@
-import mirnylib
-from mirnylib import numutils
 import cooler
 import pickle
 import h5py
+import cooltools
+from cooltools.lib import numutils
 
 import glob
 
@@ -37,7 +37,7 @@ def read_hiclib_heatmap(infile, balance=False):
         end = chrms_sizes[idx+1] if idx+1<len(chrms_sizes) else len(map)
         mtx = map[bgn:end, bgn:end]
         if balance:
-            mtx = numutils.iterativeCorrection(mtx)
+            mtx = numutils.iterative_correction_symmetric(mtx)
         datasets[ch] = mtx
 
     return datasets, sorted(datasets.keys()), resolution
@@ -52,7 +52,7 @@ def read_hiclib_bychr(infile, balance=False):
         mtx = f[f'{idx} {idx}'][()]
         ch = ch if 'chr' in ch else f'chr{ch}'
         if balance:
-            mtx = numutils.iterativeCorrection(mtx)
+            mtx = numutils.iterative_correction_symmetric(mtx)
         datasets[ch] = mtx
 
     return datasets, sorted(datasets.keys()), resolution
@@ -94,7 +94,7 @@ def zoom(snippets, finalShape=(30, 30), saveSum=True, order=1):
     ret = []
     for i, snip in enumerate(snippets):
         mtx = snip
-        mtx = numutils.zoomArray(mtx, finalShape, saveSum, order=order)
+        mtx = numutils.zoom_array(mtx, finalShape, saveSum, order=order)
         ret.append(mtx)
     return ret
 

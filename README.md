@@ -1,7 +1,7 @@
 avTAD
 =======
 
-DEPRECATION WARNING: This tool was developed before the release of other software for the same purpose (see [coolpuppy](https://github.com/Phlya/coolpuppy)). avTAD uses the deprecated library [mirnylib](https://github.com/mirnylab/mirnylib-legacy), which is no longer maintained, but still can be used with this package. 
+DEPRECATION WARNING: This tool was developed before the release of other software for the same purpose (see [coolpuppy](https://github.com/Phlya/coolpuppy)). 
 
 avTAD is a tool for construction of average TAD plots. Basic pipeline consists of three steps: *snip*, *rescale* and *plot*. 
 
@@ -27,23 +27,19 @@ Installation with pip:
 git clone https://github.com/agalitsyna/avTAD.git
 cd avTAD
 pip install -r requirements.txt
-pip install https://bitbucket.org/mirnylab/mirnylib/get/tip.tar.gz
 pip install -e .
 ```
 
 Required packages as listed in requirements.txt (automatically installed with pip install requirements.txt): 
 - hdf5>=1.10.4 & h5py>=2.9.0
 - cooler>=0.8.5
+- cooltools>=0.4.0
 - numpy>=1.16.4
 - pandas>=0.24.2
 - matplotlib>=3.1.0
 - seaborn>=0.9.0
 - click>=7.0
 - pytest>=4.6.2
-- mirnylib from https://bitbucket.org/mirnylab/mirnylib/get/tip.tar.gz
-- biopython (for mirnylib)
-- joblib>=0.6.3 (for mirnylib)
-- Cython>=0.16 (for mirnylib)
 
 
 ### Example runs

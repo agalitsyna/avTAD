@@ -102,7 +102,7 @@ def snip(segmentation, map, output_prefix, format, balance, niter, window, enric
     chrms = [ch for ch in chrms if ch in chrms_used]
 
     logger.info(f"Chromosomes in the dataset: {dataset.keys()}")
-    logger.info(f"Lengths of chromosomesin bins of {resolution} bp: \n{[(ch, len(dataset[ch])) for ch in chrms]}")
+    logger.info(f"Lengths of chromosomes in bins of {resolution} bp: \n{[(ch, len(dataset[ch])) for ch in chrms]}")
     logger.info(f"Selected chromosomes are: {chrms}")
 
     # Creating shuffled segmentations
